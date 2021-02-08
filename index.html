@@ -15,140 +15,22 @@
 		  stroke-dasharray: 10,5;
 		}
 	</style>
-	<title>Graficos D3 (I): PIB y Felicidad</title>
+	<title>titulo de trabajo</title>
 	<script language="javascript" type="text/javascript" src="d3.v3.min.js"></script>
 </head>
 
 <body>
-	<h1 style = "color:gray; position:relative; left:60px;">PIB vs Felicidad</h1>
+	<h1 style = "color:gray; position:relative; left:60px;">titulo de grafica</h1>
 	<p style = "position:relative; left:60px; top:520px; font-size:13px">
-		Correlacion entre PIB per capita (x) e Indice de Felicidad (y). Datos de 156 paises correspondientes al 2019.
+		descripcion de grafica
 	</p>
 	<script type="text/javascript">
-		var circleRadius = 2; //Radio de circulos de scatterplot
 		var width = 700; //ancho de canvas
 		var height = 450; //altura de canvas
 		var margins = [60,35]; //margenes utilizados para hacer calculos de ajuste de escala y ubicacion de labels
 		d3.csv('data1.csv',function(err,d) //lectura de fuente de datos (archivo csv)
 		{
-			var dataX = [];
-			var dataY = [];
-			for(i=0; i < d.length; i++){
-				dataX.push(d[i].GDPpercapita); //se empujan datos de columna GPDpercapita a arreglo de x (dataX)
-				dataY.push(d[i].Score);//se empujan datos de columna Score a arreglo de y (dataY)
-			}
-
-			var data = dataX.map((el, index)=> [el, dataY[index]]); //se crea un arreglo multidimensional con arreglos de x,y
-			var maxY = Math.max(...dataY); //se obtienen minimos y maximos de cada arreglo
-			var minY = Math.min(...dataY);
-			var maxX = Math.max(...dataX);
-			var minX = Math.min(...dataX);
-			//uso de funciones para regresion lineal, se obtienen componentes de ecuacion y coordenadas para dibujar linea
-			var a = calcLinearEq(dataX, dataY).a; //se utiliza funcion calcLinearEq con loos datos x,y para obtener "a"
-			var b = calcLinearEq(dataX, dataY).b; //se utiliza funcion calcLinearEq con loos datos x,y para obtener "b"
-			//utilizando a y b, la funcion getRegLineCord aplicala la formula a los valores minimo y maximo de x,
-			//de ese modo se obtiene la estimacion de y; con esos datos se obtienen puntos A y B para dibujar la linea 
-			var cords = getRegLineCord(a,b, minX, maxX);
-
-			var xScale = d3.scale.linear() //se crea escala de X con dominio de valores X y rango ajustado al canvas
-							.domain([minX,maxX])
-							.range([margins[0],width-margins[1]-circleRadius]);
-
-			var xAxis = d3.svg.axis() //se definen propiedades de axis de X
-							.scale(xScale)
-							.ticks(5)
-							.tickSize(0.5)
-
-			var yScale = d3.scale.linear() //se crea escala de Y con dominio de valores Y y rango ajustado al canvas
-							.domain([minY,maxY])
-							.range([height-margins[1],circleRadius]);
-
-			var yAxis = d3.svg.axis() //se definen propiedades de axis de Y
-							.scale(yScale)
-							.orient("left")
-							.ticks(5)
-							.tickSize(0.5)
-
-			var canvas = d3.select("body") //se crea canvas en grupo "g" con dimensiones especificadas por height y width
-						.append("svg")
-						.attr("width",width)
-						.attr("height",height)
-						.append("g")
-
-			canvas.append("g") //se despliega axis de X
-				.attr("transform","translate(0,"+(height-margins[1])+")")
-				.call(xAxis)						
-			canvas.append("g") //se despliega axis de Y
-				.attr("transform","translate("+margins[0]+",0)")
-				.call(yAxis)
-			canvas.selectAll("circle") //se utuliza el arreglo multidimensional de XY para crear circulos de plot
-				.data(data).enter()
-				.append("circle")
-				.attr("stroke", "red") //color inicial para efectos de transicion
-				.attr("cx",margins[0]) //posicion x inicial para efectos de transicion
-				.attr("cy",height-margins[1]) //posicion Y inicial para efectos de transicion
-				.transition() //se ejecuta transicion con duracion de 1.5 segundos
-				.duration(1500) //puntos saldran de origen a ubicarse en scatterplot
-				.attr("cx", function(d) {return xScale(d[0])}) //destino final -posicion en plot-
-				.attr("cy", function(d) {return yScale(d[1])}) //destino final -posicion en plot-
-				.attr("r", circleRadius) //se define radio de circulos
-				.attr("stroke", "steelblue") //se define color final de circulo, transicion de rojo a azul-acero
-      			.attr("stroke-width", 1.5) //se define grosor de contorno de circulo
-				.attr("fill", "none") //se definen circulos sin relleno
-			canvas.append("line") //se dibuja linea de regresion en base a las coordenadas de funcion getRegLineCord
-				.transition() //transicion de retraso de 2 segundos, linea aparecera 0.5 segundos despues de...
-				.delay(2000) // ...transicion de circulos
-				.attr("class", "regression") //se aplica estilo a la linea de regresion
-	        	.attr("x1", xScale(cords.x1)) //lineas para designar coordinadas a atributos de linea
-	        	.attr("y1", yScale(cords.y1))
-	        	.attr("x2", xScale(cords.x2))
-				.attr("y2", yScale(cords.y2))
-			canvas.append("text") //se crea y ubica texto para escala de X 
-				.attr("x", width/2)
-				.attr("y", height-(margins[1]/5))
-				.text("PIB per capita")
-			canvas.append("text") //se crea y ubica texto para escala de Y
-				.attr("y", height/2)
-				.attr("x", 0)
-				.text("Felicidad")
 		});
-	//funcion para obtener parametros de ecuacion. Se alimenta con arreglo de X y Y para hacer los calculos necesarios...
-	//...como arreglo de X*Y, X*X, Y*Y y longitud de arreglo.
-	function calcLinearEq(x, y)
-	{
-		var xy= [];
-		var xsqr = [];
-		var ysqr = [];
-		var n = x.length;
-
-		for(i=0; i < x.length; i++)
-			{
-				xy.push(x[i]*y[i]);
-				xsqr.push(x[i]*x[i]);
-				ysqr.push(y[i]*y[i]);
-			}
-		//se necesitan suma de arreglos para obtener a y b
-		var sumX = x.reduce(function(a, b){return parseFloat(a) + parseFloat(b);}, 0); //suma de arreglo y parse a Float
-		var sumY = y.reduce(function(a, b){return parseFloat(a) + parseFloat(b);}, 0);
-		var sumXY = xy.reduce(function(a, b){return parseFloat(a) + parseFloat(b);}, 0);
-		var sumXsqr = xsqr.reduce(function(a, b){return parseFloat(a) + parseFloat(b);}, 0);
-		var sumYsqr = ysqr.reduce(function(a, b){return parseFloat(a) + parseFloat(b);}, 0);
-		var div = (n*sumXsqr)-(sumX*sumX); //ambas formulas para calcular a y b cuentan con el deonominador dentro de "div"
-		var a = ((sumY*sumXsqr)-(sumX*sumXY))/(div); //se arma formula para a
-		var b = ((n*sumXY)-(sumX*sumY))/(div); //se arma formula para b
-
-		return {a:a, b: b}; //retorno de objeto con variables
-	}
-	//funcion que toma a y b provenientes de la funcion calcLinearEq. Se complementa con los valores minimos y maximo...
-	//... de arreglo de X para estimar Y y obtener coordenadas de punta A (inicial) y punto B (final) necesarios...
-	//...para dibujar linea de regresion
-	function getRegLineCord(a, b, minX, maxX)
-	{
-		var minY = a + (b*minX); //calculos para estimar Y en funcion de X utilizando la formula de regresion
-		var maxY = a + (b*maxX);
-		
-		return {x1: minX, y1: minY, x2: maxX, y2: maxY}; //retorno de coordenadas
-	}
 	</script>
 
 </body>
